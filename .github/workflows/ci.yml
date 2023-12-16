@@ -1,0 +1,57 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' 
+
+      - name: Install dependencies
+        run: |
+          brew install swiftlint ninja
+          pip install "dmgbuild[badge_icons]"
+
+      - name: Lint
+        run: swiftlint --strict src
+
+      - name: Build for Intel
+        run: |
+          cmake -B build-x86_64 -G Ninja \
+            -DARCH=x86_64 \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-x86_64
+
+      - name: Build for Apple Silicon
+        run: |
+          cmake -B build-arm64 -G Ninja \
+            -DARCH=arm64 \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-arm64
+
+      - name: Rename dmg for release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          mv build-x86_64/Toyimk.dmg Toyimk-x86_64.dmg
+          mv build-arm64/Toyimk.dmg Toyimk-arm64.dmg
+
+      - name: Release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: latest
+          prerelease: true
+          title: "Nightly Build"
+          files: |
+            Toyimk-x86_64.dmg
+            Toyimk-arm64.dmg
