@@ -33,7 +33,7 @@ add `Toyimk` from `English`.
 switch to another input method,
 `pkill Toyimk`,
 then switch back.
-* You may increase the number in [controller.swift](src/controller.swift) to make sure your changes take effect.
+* You may change what is committed at `client.insert` in [controller.swift](src/controller.swift) to make sure your changes take effect.
 
 ## Debug
 Yes, though being a system module, input method is debuggable.

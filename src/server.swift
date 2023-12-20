@@ -16,11 +16,14 @@ class NSManualApplication: NSApplication {
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var server = IMKServer()
+    static var server = IMKServer()
+    static var candidates = IMKCandidates()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        server = IMKServer(name: Bundle.main.infoDictionary?["InputMethodConnectionName"] as? String,
+        AppDelegate.server = IMKServer(name: Bundle.main.infoDictionary?["InputMethodConnectionName"] as? String,
             bundleIdentifier: Bundle.main.bundleIdentifier)
+        AppDelegate.candidates = IMKCandidates(server: AppDelegate.server,
+            panelType: kIMKSingleRowSteppingCandidatePanel)
         NSLog("tried connection")
     }
 
